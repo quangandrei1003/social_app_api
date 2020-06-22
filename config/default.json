@@ -1,0 +1,5 @@
+{
+    "mongoURI": "mongodb+srv://homer:quang1cong!!@app-bhvad.mongodb.net/test?retryWrites=true&w=majority", 
+    "secretToken" : "Secret@@!!^^&&**TOKEN"
+}
+
