@@ -13,16 +13,16 @@ const Comment = require('../../models/Comment');
 router.get('/', auth, getArticleBySlug, async (req, res) => {
 
     try {
-        const comments = await Comment.find().populate('Article').find({article: req.article.id}); 
-     
-        if(comments === undefined || comments.length == 0 ) {
-           return res.status(404).json({message: 'Comments not found!'}); 
+        const comments = await Comment.find().populate('Article').find({ article: req.article.id });
+
+        if (comments === undefined || comments.length == 0) {
+            return res.status(404).json({ message: 'Comments not found!' });
         }
-        res.json({comments: comments});
+        res.json({ comments: comments });
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({message: 'Server error!'}); 
-    }  
+        console.error(error);
+        res.status(500).json({ message: 'Server error!' });
+    }
     // res.send('Get!!!'); 
 })
 
@@ -35,50 +35,50 @@ router.post('/', auth, getArticleBySlug, async (req, res) => {
 
         const user = await User.findById(userId);
 
-        const comment = new Comment({body:req.body.body}); 
+        const comment = new Comment({ body: req.body.body });
         comment.author = user;
         comment.article = req.article;
 
         await comment.save();
         req.article.comments.push(comment);
 
-        await req.article.save();    
+        await req.article.save();
         res.json({ comment: comment.toJSONFor(user) });
 
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({message: 'Server error'})
+        console.error(error);
+        res.status(500).json({ message: 'Server error' })
     }
     // res.send('Comment posted!!!'); 
     // console.log(userId);
     // console.log(articleSlug);
 })
 
-router.delete('/:id', auth, getArticleBySlug, getCommentById ,async (req, res) => {
+router.delete('/:id', auth, getArticleBySlug, getCommentById, async (req, res) => {
     try {
         const userId = req.user.id;
         const user = await User.findById(userId);
-        const commentByAuthor = req.comment.author; 
-        
-        if(commentByAuthor.toString() === userId.toString()) {
+        const commentByAuthor = req.comment.author;
 
-           const comment = await Comment.findById(req.comment.id); 
+        if (commentByAuthor.toString() === userId.toString()) {
 
-           await req.article.comments.remove(req.comment.id);
-           
-           await req.article.save(); 
+            const comment = await Comment.findById(req.comment.id);
 
-           await comment.remove(); 
+            await req.article.comments.remove(req.comment.id);
 
-           res.json({message: 'Deleted this comment'});
+            await req.article.save();
+
+            await comment.remove();
+
+            res.json({ message: 'Deleted this comment' });
 
         } else {
-            return res.status(403).json({message: 'Authorization required!'})
+            return res.status(403).json({ message: 'Authorization required!' })
         }
 
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({message: 'Server error'})
+        console.error(error);
+        res.status(500).json({ message: 'Server error' })
     }
     // res.send('Deleted this comment!'); 
 })
@@ -104,19 +104,19 @@ async function getArticleBySlug(req, res, next) {
 //middleware for getting comment by id
 async function getCommentById(req, res, next) {
     try {
-        const id = req.params.id; 
+        const id = req.params.id;
 
-        const comment = await Comment.findById(id); 
+        const comment = await Comment.findById(id);
 
-        if(comment === null || undefined) {
-            return res.status(404).json({message: 'Comment not found'}); 
+        if (comment === null || undefined) {
+            return res.status(404).json({ message: 'Comment not found' });
         }
-        req.comment = comment; 
-        next(); 
+        req.comment = comment;
+        next();
 
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({message: 'Server error!'}); 
+        console.error(error);
+        res.status(500).json({ message: 'Server error!' });
     }
 }
 

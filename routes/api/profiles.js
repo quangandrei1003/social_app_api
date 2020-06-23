@@ -58,7 +58,7 @@ router.delete('/:username/unfollow', auth, getProfileByName, async (req, res) =>
   } catch (error) {
     console.error(error);
     res.status(422).json({ message: 'Unexpected error!' });
-  }   
+  }
 })
 
 //getprofile middeware

@@ -4,7 +4,7 @@ const router = express.Router();
 
 const Article = require('../../models/Article');
 
-const Comment = require('../../models/Comment'); 
+const Comment = require('../../models/Comment');
 
 const User = require('../../models/User');
 
@@ -15,116 +15,116 @@ const auth = require('../../middleware/auth');
 
 //get all articles by followed user 
 router.get('/feed', auth, async (req, res) => {
-    
-    let limit = 20; 
-    let offset = 0;  
 
-    if(typeof req.query.limit !== 'undefined') {
-        limit = req.query.limit; 
+    let limit = 20;
+    let offset = 0;
+
+    if (typeof req.query.limit !== 'undefined') {
+        limit = req.query.limit;
     }
 
-    if(typeof req.query.offset !== 'undefined') {
-        offset = req.query.offset; 
+    if (typeof req.query.offset !== 'undefined') {
+        offset = req.query.offset;
     }
 
     try {
-        const followingUser = await User.findById(req.user.id); 
+        const followingUser = await User.findById(req.user.id);
 
-        if(followingUser === undefined || null) {
-        return res.status(401); 
+        if (followingUser === undefined || null) {
+            return res.status(401);
         }
 
-        const followings = followingUser.following.map(({user}) => user) 
+        const followings = followingUser.following.map(({ user }) => user)
 
-    // console.log(followings);
+        // console.log(followings);
 
-        const articles = await Article.find({author: {$in: followings}})
-                                    .limit(Number(limit))
-                                    .skip(Number(offset))
-                                    .populate('author')
-                                    .exec(); 
-        
-        res.json({articles: articles}); 
+        const articles = await Article.find({ author: { $in: followings } })
+            .limit(Number(limit))
+            .skip(Number(offset))
+            .populate('author')
+            .exec();
+
+        res.json({ articles: articles });
 
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({message: 'Server error'}); 
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-    
-    res.send('Feed route!'); 
+
+    res.send('Feed route!');
 })
 
 
 //get article by query
 router.get('/', async (req, res) => {
 
-     let limit = 20; 
-     let offset = 0;  
+    let limit = 20;
+    let offset = 0;
 
-     if(typeof req.query.limit !== 'undefined') {
-         limit = req.query.limit; 
-     }
+    if (typeof req.query.limit !== 'undefined') {
+        limit = req.query.limit;
+    }
 
-     if(typeof req.query.offset !== 'undefined') {
-         offset = req.query.offset; 
-     }
+    if (typeof req.query.offset !== 'undefined') {
+        offset = req.query.offset;
+    }
 
-     if(req.query.author) {
+    if (req.query.author) {
 
-        const user = await User.findOne({username: req.query.author});
-                
+        const user = await User.findOne({ username: req.query.author });
 
-        if(user === undefined || null) {
-            return res.status(404).json({message: 'Author not found!'}); 
+
+        if (user === undefined || null) {
+            return res.status(404).json({ message: 'Author not found!' });
         }
 
         try {
-            const articles = await Article.find({author: user.id})
-                                    .limit(Number(limit))
-                                    .skip(Number(offset))
-                                    .sort({createdAt: 'desc'})
-                                    .populate('User')
-                                    .exec() 
+            const articles = await Article.find({ author: user.id })
+                .limit(Number(limit))
+                .skip(Number(offset))
+                .sort({ createdAt: 'desc' })
+                .populate('User')
+                .exec()
 
-            res.json({article: articles});
+            res.json({ article: articles });
 
-        } catch (error) {
-            console.error(error); 
-            return res.status(500).json({message: 'Server error'});             
-        } 
-                                         
-     } else {
-         return res.status(400).json({message : 'Query string must not be null'}); 
-     }
-     
-
-     if(req.query.favorite) {
-
-        const user = await User.findOne({username: req.query.favorite});
-                
-
-        if(user === undefined || null) {
-            return res.status(404).json({message: 'Author not found!'}); 
-        }
-
-        try {
-            const articles = await Article.find({author: user.id})
-                                    .limit(Number(limit))
-                                    .skip(Number(offset))
-                                    .sort({createdAt: 'desc'})
-                                    .populate('User')
-                                    .exec() 
-
-        
-            res.json({article: articles});
         } catch (error) {
             console.error(error);
-            return res.status(500).json({message: 'Server error'});  
+            return res.status(500).json({ message: 'Server error' });
         }
-                                        
-     } else {
-         return res.status(400).json({message: 'Query string must not be null!'}); 
-     }
+
+    } else {
+        return res.status(400).json({ message: 'Query string must not be null' });
+    }
+
+
+    if (req.query.favorite) {
+
+        const user = await User.findOne({ username: req.query.favorite });
+
+
+        if (user === undefined || null) {
+            return res.status(404).json({ message: 'Author not found!' });
+        }
+
+        try {
+            const articles = await Article.find({ author: user.id })
+                .limit(Number(limit))
+                .skip(Number(offset))
+                .sort({ createdAt: 'desc' })
+                .populate('User')
+                .exec()
+
+
+            res.json({ article: articles });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Server error' });
+        }
+
+    } else {
+        return res.status(400).json({ message: 'Query string must not be null!' });
+    }
     // res.send('Articles Route');
 })
 
@@ -213,7 +213,7 @@ router.delete('/:slug', auth, getArticleBySlug, async (req, res) => {
 
         try {
             await req.article.remove();
-            return res.json({message: 'Deleted this article'}); 
+            return res.json({ message: 'Deleted this article' });
         } catch (error) {
             return res.status(500).json({ message: 'Server error' });
         }
@@ -227,48 +227,48 @@ router.delete('/:slug', auth, getArticleBySlug, async (req, res) => {
 router.post('/:slug/favorite', auth, getArticleBySlug, async (req, res) => {
 
     try {
-        const userId = req.user.id; 
-        const user = await User.findById(userId); 
+        const userId = req.user.id;
+        const user = await User.findById(userId);
 
-        if(user.isFavorite(req.article.id)) {
-            return res.status(400).json({message: 'You already liked this article'}); 
+        if (user.isFavorite(req.article.id)) {
+            return res.status(400).json({ message: 'You already liked this article' });
         }
 
-        user.favorite(req.article.id); 
+        user.favorite(req.article.id);
 
-        await req.article.updateFavoriteCount(); 
+        await req.article.updateFavoriteCount();
 
-        await user.save(); 
+        await user.save();
 
-        res.json({article: req.article.toJSONFor(user)}); 
+        res.json({ article: req.article.toJSONFor(user) });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Server error!'}); 
-    } 
+        res.status(500).json({ message: 'Server error!' });
+    }
 })
 
 //unfavoriate an article 
 router.delete('/:slug/unfavorite', auth, getArticleBySlug, async (req, res) => {
 
     try {
-        const userId = req.user.id; 
-        const user = await User.findById(userId); 
+        const userId = req.user.id;
+        const user = await User.findById(userId);
 
-        user.unfavorite(req.article.id); 
+        user.unfavorite(req.article.id);
 
-        await req.article.updateFavoriteCount(); 
+        await req.article.updateFavoriteCount();
 
-        await user.save(); 
+        await user.save();
 
         // console.log(user.favorites);
 
-        res.json({article: req.article.toJSONFor(user)}); 
+        res.json({ article: req.article.toJSONFor(user) });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Server error!'}); 
-    } 
+        res.status(500).json({ message: 'Server error!' });
+    }
 })
 
 //midleware for getting article by slug
