@@ -26,7 +26,6 @@ router.get('/feed', auth, async (req, res) => {
     if (typeof req.query.offset !== 'undefined') {
         offset = req.query.offset;
     }
-
     try {
         const followingUser = await User.findById(req.user.id);
 
@@ -38,7 +37,7 @@ router.get('/feed', auth, async (req, res) => {
 
         // console.log(followings);
 
-        const articles = await Article.find({ author: { $in: followings } })
+        const articles = await Article.find({ author: { $in: followings }})
             .limit(Number(limit))
             .skip(Number(offset))
             .populate('author')
@@ -51,7 +50,7 @@ router.get('/feed', auth, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 
-    res.send('Feed route!');
+    // res.send('Feed route!');
 })
 
 
@@ -60,6 +59,7 @@ router.get('/', async (req, res) => {
 
     let limit = 20;
     let offset = 0;
+    const tags = [req.query.tags];
 
     if (typeof req.query.limit !== 'undefined') {
         limit = req.query.limit;
@@ -68,7 +68,6 @@ router.get('/', async (req, res) => {
     if (typeof req.query.offset !== 'undefined') {
         offset = req.query.offset;
     }
-
     if (req.query.author) {
 
         const user = await User.findOne({ username: req.query.author });
@@ -94,9 +93,8 @@ router.get('/', async (req, res) => {
         }
 
     } else {
-        return res.status(400).json({ message: 'Query string must not be null' });
+        return res.status(400).json({ message: 'Query string  must not be null' });
     }
-
 
     if (req.query.favorite) {
 
@@ -115,7 +113,6 @@ router.get('/', async (req, res) => {
                 .populate('User')
                 .exec()
 
-
             res.json({ article: articles });
         } catch (error) {
             console.error(error);
@@ -126,6 +123,19 @@ router.get('/', async (req, res) => {
         return res.status(400).json({ message: 'Query string must not be null!' });
     }
     // res.send('Articles Route');
+
+    if(tags !== undefined || tags.length !==0) {
+        const articles = await Article.find({ tagList: { $in: tags}})
+                .limit(Number(limit))
+                .skip(Number(offset))
+                .sort({ createdAt: 'desc' })
+                .populate('User')
+                .exec()                    
+    res.json({articles: articles});
+    } else {
+        return res.status(400).json({message: 'Tags musts not be null'}); 
+    }
+      
 })
 
 //get an article
@@ -240,6 +250,8 @@ router.post('/:slug/favorite', auth, getArticleBySlug, async (req, res) => {
 
         await user.save();
 
+        console.log(user.favorites);
+        
         res.json({ article: req.article.toJSONFor(user) });
 
     } catch (error) {
@@ -259,9 +271,10 @@ router.delete('/:slug/unfavorite', auth, getArticleBySlug, async (req, res) => {
 
         await req.article.updateFavoriteCount();
 
+        
         await user.save();
 
-        // console.log(user.favorites);
+        console.log(user.favorites);
 
         res.json({ article: req.article.toJSONFor(user) });
 
