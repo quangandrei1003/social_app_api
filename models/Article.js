@@ -32,9 +32,9 @@ ArticleSchema.pre('validate', function(next){
     return next();
 });
 
-ArticleSchema.plugin(uniqueValidator, {message: "is already taken."});
+ArticleSchema.plugin(uniqueValidator, {message: "Article is already taken."});
 
-ArticleSchema.methods.toJSONFor = function(user){
+ArticleSchema.methods.toJSONFor = function(user) {
     return {
         slug: this.slug,
         title: this.title,
@@ -42,11 +42,19 @@ ArticleSchema.methods.toJSONFor = function(user){
         body: this.body,
         tagList: this.tagList,
         favoritesCount: this.favoritesCount,
-        // favorited: user ? user.isFavorite(this._id) : false,
+        favorited: user ? user.isFavorite(this._id) : false,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
         author: user.getProfile()
     };
 };
+
+ArticleSchema.methods.updateFavoriteCount = function() {
+    const article = this;
+    return User.countDocuments({favorites: {$in: [article._id]}}).then(function(count){
+        article.favoritesCount = count;
+        return article.save();
+    });
+}
 
 module.exports = Article = mongoose.model('Article', ArticleSchema); 

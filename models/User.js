@@ -35,7 +35,11 @@ const UserSchema = new mongoose.Schema({
         type:  mongoose.Schema.Types.ObjectId, 
         ref: 'User',
         required: true  
-    }}]
+    }}], 
+    favorites: [{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref:'Article'
+    }],
 })
 
 UserSchema.pre('save', async function(next) {
@@ -91,11 +95,29 @@ UserSchema.methods.unfollow = function(id) {
     return user.save(); 
 }
 
-UserSchema.methods.isFollowing = function(id){
+UserSchema.methods.isFollowing = function(id) {
     const user = this; 
     return user.following.some(function(followId){
         return id.toString() === followId.toString();
     });
 };
+
+UserSchema.methods.favorite = function(id) {
+    const user = this; 
+    user.favorites.push(id); 
+}
+
+UserSchema.methods.unfavorite = function(id) {
+    const user = this; 
+    user.favorites.remove(id); 
+}
+
+UserSchema.methods.isFavorite = function(id) {
+    const user = this; 
+    return user.favorites.some(function(favoriteId) {
+        return id.toString() === favoriteId.toString()
+    })
+
+}
 
 module.exports = User = mongoose.model('User', UserSchema); 

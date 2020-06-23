@@ -12,8 +12,120 @@ const { check, validationResult } = require('express-validator');
 
 const auth = require('../../middleware/auth');
 
-router.get('/', (req, res) => {
-    res.send('Articles Route');
+
+//get all articles by followed user 
+router.get('/feed', auth, async (req, res) => {
+    
+    let limit = 20; 
+    let offset = 0;  
+
+    if(typeof req.query.limit !== 'undefined') {
+        limit = req.query.limit; 
+    }
+
+    if(typeof req.query.offset !== 'undefined') {
+        offset = req.query.offset; 
+    }
+
+    try {
+        const followingUser = await User.findById(req.user.id); 
+
+        if(followingUser === undefined || null) {
+        return res.status(401); 
+        }
+
+        const followings = followingUser.following.map(({user}) => user) 
+
+    // console.log(followings);
+
+        const articles = await Article.find({author: {$in: followings}})
+                                    .limit(Number(limit))
+                                    .skip(Number(offset))
+                                    .populate('author')
+                                    .exec(); 
+        
+        res.json({articles: articles}); 
+
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({message: 'Server error'}); 
+    }
+    
+    res.send('Feed route!'); 
+})
+
+
+//get article by query
+router.get('/', async (req, res) => {
+
+     let limit = 20; 
+     let offset = 0;  
+
+     if(typeof req.query.limit !== 'undefined') {
+         limit = req.query.limit; 
+     }
+
+     if(typeof req.query.offset !== 'undefined') {
+         offset = req.query.offset; 
+     }
+
+     if(req.query.author) {
+
+        const user = await User.findOne({username: req.query.author});
+                
+
+        if(user === undefined || null) {
+            return res.status(404).json({message: 'Author not found!'}); 
+        }
+
+        try {
+            const articles = await Article.find({author: user.id})
+                                    .limit(Number(limit))
+                                    .skip(Number(offset))
+                                    .sort({createdAt: 'desc'})
+                                    .populate('User')
+                                    .exec() 
+
+            res.json({article: articles});
+
+        } catch (error) {
+            console.error(error); 
+            return res.status(500).json({message: 'Server error'});             
+        } 
+                                         
+     } else {
+         return res.status(400).json({message : 'Query string must not be null'}); 
+     }
+     
+
+     if(req.query.favorite) {
+
+        const user = await User.findOne({username: req.query.favorite});
+                
+
+        if(user === undefined || null) {
+            return res.status(404).json({message: 'Author not found!'}); 
+        }
+
+        try {
+            const articles = await Article.find({author: user.id})
+                                    .limit(Number(limit))
+                                    .skip(Number(offset))
+                                    .sort({createdAt: 'desc'})
+                                    .populate('User')
+                                    .exec() 
+
+        
+            res.json({article: articles});
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({message: 'Server error'});  
+        }
+                                        
+     } else {
+         return res.status(400).json({message: 'Query string must not be null!'}); 
+     }
+    // res.send('Articles Route');
 })
 
 //get an article
@@ -109,6 +221,54 @@ router.delete('/:slug', auth, getArticleBySlug, async (req, res) => {
     } else {
         res.status(403).json({ message: 'Authorization required!' });
     }
+})
+
+//favoriate an article 
+router.post('/:slug/favorite', auth, getArticleBySlug, async (req, res) => {
+
+    try {
+        const userId = req.user.id; 
+        const user = await User.findById(userId); 
+
+        if(user.isFavorite(req.article.id)) {
+            return res.status(400).json({message: 'You already liked this article'}); 
+        }
+
+        user.favorite(req.article.id); 
+
+        await req.article.updateFavoriteCount(); 
+
+        await user.save(); 
+
+        res.json({article: req.article.toJSONFor(user)}); 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: 'Server error!'}); 
+    } 
+})
+
+//unfavoriate an article 
+router.delete('/:slug/unfavorite', auth, getArticleBySlug, async (req, res) => {
+
+    try {
+        const userId = req.user.id; 
+        const user = await User.findById(userId); 
+
+        user.unfavorite(req.article.id); 
+
+        await req.article.updateFavoriteCount(); 
+
+        await user.save(); 
+
+        // console.log(user.favorites);
+
+        res.json({article: req.article.toJSONFor(user)}); 
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({message: 'Server error!'}); 
+    } 
 })
 
 //midleware for getting article by slug
