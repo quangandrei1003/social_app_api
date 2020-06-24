@@ -18,7 +18,7 @@ router.get('/', auth, getArticleBySlug, async (req, res) => {
         if (comments === undefined || comments.length == 0) {
             return res.status(404).json({ message: 'Comments not found!' });
         }
-        res.json({ comments: comments });
+        res.json({ comments: comments});
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error!' });
@@ -59,6 +59,7 @@ router.delete('/:id', auth, getArticleBySlug, getCommentById, async (req, res) =
         const userId = req.user.id;
         const user = await User.findById(userId);
         const commentByAuthor = req.comment.author;
+
 
         if (commentByAuthor.toString() === userId.toString()) {
 
