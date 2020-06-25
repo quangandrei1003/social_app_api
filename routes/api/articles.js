@@ -90,10 +90,11 @@ router.get('/', auth ,async (req, res) => {
 
             const articlesCount = await Article.countDocuments({author: author.id}); 
                 
-            return res.json({article: articles.map(function(article) {
+            const multipleArticlesResponse = articles.map((article) => {
                 return article.toJSONFor(user); 
-            }), articlesCount: articlesCount});
-            // return res.json({articles :articles, articlesCount: articlesCount});             
+            }); 
+
+           return res.json({articles: multipleArticlesResponse, articlesCount: articlesCount}); 
 
         } catch (error) {
             console.error(error);
@@ -125,13 +126,14 @@ router.get('/', auth ,async (req, res) => {
                                             .populate('User')
                                             .exec();
             
-            const articlesCount = await User.countDocuments({ favorites: { $in: favortiedArticles }});                                 
+            const articlesCount = await User.countDocuments({ favorites: { $in: favortiedArticles }}); 
             
-            return res.json({article: articles.map(function(article) {
+            const multipleArticlesResponse = articles.map((article) => {
                 return article.toJSONFor(user); 
-            }), articlesCount: articlesCount});
+            });
             
-             
+            return res.json({articles: multipleArticlesResponse , articlesCount: articlesCount});
+            
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Server error' });
@@ -150,9 +152,12 @@ router.get('/', auth ,async (req, res) => {
 
         const articlesCount = await Article.countDocuments({ tagList: { $in: tags }});
 
-        return res.json({article: articles.map(function(article) {
+        const multipleArticlesResponse = articles.map((article) => {
             return article.toJSONFor(user); 
-        }), articlesCount: articlesCount});
+        });
+
+
+        return res.json({articles: multipleArticlesResponse, articlesCount: articlesCount});
         } catch (error) {
             console.error(error); 
             return res.status(500).json({message: 'Server error'}); 
@@ -248,6 +253,7 @@ router.delete('/:slug', auth, getArticleBySlug, async (req, res) => {
             await req.article.remove();
             return res.json({ message: 'Deleted this article' });
         } catch (error) {
+            console.error(error); 
             return res.status(500).json({ message: 'Server error' });
         }
 

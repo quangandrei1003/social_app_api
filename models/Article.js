@@ -6,6 +6,8 @@ const slug = require('slug');
 
 const User = require('./User'); 
 
+const Comment = require('./Comment'); 
+
 const ArticleSchema = new mongoose.Schema({
     slug:{ 
     type: String, 
@@ -49,12 +51,20 @@ ArticleSchema.methods.toJSONFor = function(user) {
     };
 };
 
-ArticleSchema.methods.updateFavoriteCount = function() {
-    const article = this;
-    return User.countDocuments({favorites: {$in: [article._id]}}).then(function(count){
-        article.favoritesCount = count;
-        return article.save();
-    });
-}
+// ArticleSchema.methods.updateFavoriteCount = function() {
+//     const article = this;
+//     return User.countDocuments({favorites: {$in: [article._id]}}).then(function(count){
+//         article.favoritesCount = count;
+//         return article.save();
+//     });
+// }
+
+ArticleSchema.pre('remove', async function(next) {
+    const article = this; 
+    await Comment.deleteMany({article: article._id}); 
+    next(); 
+}); 
+
+
 
 module.exports = Article = mongoose.model('Article', ArticleSchema); 

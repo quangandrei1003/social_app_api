@@ -32,7 +32,7 @@ router.post('/:username/follow', [auth, getProfileByName], async (req, res) => {
 
     user.follow(followingUserId);
     followingUserProfile.following = true;
-    res.json(followingUserProfile);
+    res.json({profile: followingUserProfile});
     // res.send('Followed!'); 
 
   } catch (error) {
@@ -42,7 +42,7 @@ router.post('/:username/follow', [auth, getProfileByName], async (req, res) => {
 })
 
 //unfollow a user
-router.delete('/:username/unfollow', auth, getProfileByName, async (req, res) => {
+router.delete('/:username/follow', auth, getProfileByName, async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
@@ -52,7 +52,7 @@ router.delete('/:username/unfollow', auth, getProfileByName, async (req, res) =>
     user.unfollow(unFollowingUserId);
     unFollowingUserProfile.following = false;
     console.log(user.following);
-    res.json(unFollowingUserProfile);
+    res.json({profile: unFollowingUserProfile});
     // res.send('UnFollowed!'); 
 
   } catch (error) {
