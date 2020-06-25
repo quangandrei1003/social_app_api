@@ -298,8 +298,12 @@ router.delete('/:slug/unfavorite', auth, getArticleBySlug, async (req, res) => {
 
         user.unfavorite(req.article.id);
 
+        if( req.article.favoritesCount === 0) {
+            req.article.favoritesCount = 0;     
+        }else {
         req.article.favoritesCount = req.article.favoritesCount - 1;
-
+        }
+        
         await req.article.save();
 
         await user.save();
