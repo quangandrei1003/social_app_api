@@ -303,7 +303,7 @@ router.delete('/:slug/unfavorite', auth, getArticleBySlug, async (req, res) => {
         }else {
         req.article.favoritesCount = req.article.favoritesCount - 1;
         }
-        
+
         await req.article.save();
 
         await user.save();
