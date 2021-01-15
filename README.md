@@ -2,59 +2,63 @@ This is a Node/Express/MongoDB REST API for social app that uses JWT authenticat
 followers.
 
 
-import java.io.*;
 
-import java.util.Scanner; 
+public class User {
 
-class Main{
-public static void main(String[] args) throws Exception {
+    private String name;
+    private String userName;
+    private String password;
+    private long phoneNo;
 
-        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter Name");
+    public User() {
+    }
 
-        String name = scanner.nextLine();
+    public User(String name, String userName, String password, long phoneNo) {
+        this.name = name;
+        this.userName = userName;
+        this.password = password;
+        this.phoneNo = phoneNo;
+    }
 
-        System.out.println("Enter UserName");
+    public String getName() {
+        return name;
+    }
 
-        String userName = scanner.nextLine();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-        System.out.println("Enter Password");
+    public String getUserName() {
+        return userName;
+    }
 
-        String password = scanner.nextLine();
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-        System.out.println("Enter PhoneNo");
+    public String getPassword() {
+        return password;
+    }
 
-        long phoneNo = scanner.nextLong();
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-        scanner.nextLine();
+    public long getPhoneNo() {
+        return phoneNo;
+    }
 
-        User user = new User(name,userName,password,phoneNo);
+    public void setPhoneNo(long phoneNo) {
+        this.phoneNo = phoneNo;
+    }
 
-        System.out.println("Enter Name");
-
-        String name1 = scanner.nextLine();
-
-        System.out.println("Enter UserName");
-
-        String userName1 = scanner.nextLine();
-
-        System.out.println("Enter Password");
-
-        String password1 = scanner.nextLine();
-
-        System.out.println("Enter PhoneNo");
-
-        long phoneNo1 = scanner.nextLong();
-
-        User user1 = new User(name1,userName1,password1,phoneNo1);
-
-        boolean isSamePhoneNum = user.comparePhoneNumber(user1);
-
-        if (isSamePhoneNum) {
-            System.out.println("Same Users");
-        }else {
-            System.out.println("Different Users");
-        }
+    public boolean comparePhoneNumber(User user)    {
+        boolean isSamePhoneNum = false;
+        return isSamePhoneNum = user.getPhoneNo() == this.phoneNo;
     }
 }
+	
+
+
+        
